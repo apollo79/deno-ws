@@ -1,5 +1,3 @@
-import { type ServerInit as OrigServerInit } from "./deps.ts";
-
 type WSServerInit = {
     host?: string;
     port?: number;

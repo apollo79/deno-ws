@@ -4,7 +4,7 @@ import {
     assertEquals
 } from "https://deno.land/std@0.126.0/testing/asserts.ts";
 
-Deno.test("run server", async (): Promise<void> => {
+Deno.test("run server", (): void => {
     const serverConfig = {
         autoServe: false,
         port: 3045,
@@ -14,7 +14,7 @@ Deno.test("run server", async (): Promise<void> => {
 
     console.log(server);
 
-    await server.serve();
+    server.serve();
 
     const conn = new WebSocket("ws://localhost:8080");
 
