@@ -105,7 +105,9 @@ export class WSServer<E extends EventInterface>
         });
 
         socket.addEventListener("close", (event) => {
-            console.info(`socket closed. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`);
+            console.info(
+                `socket closed. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`,
+            );
             // this.emit("disconnect", { socket: socket });
         });
 

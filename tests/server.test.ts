@@ -1,8 +1,6 @@
 import { WSServer } from "../mod.ts";
 
-import {
-    assertEquals
-} from "https://deno.land/std@0.126.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.126.0/testing/asserts.ts";
 
 Deno.test("run server", (): void => {
     const serverConfig = {
