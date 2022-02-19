@@ -2,23 +2,32 @@ import { WSServer } from "../mod.ts";
 
 import { assertEquals } from "https://deno.land/std@0.126.0/testing/asserts.ts";
 
-Deno.test("run server", (): void => {
+import { awaitOpen, awaitResponse } from "./helpers/WebSocket/awaitEvents.ts";
+
+Deno.test("run server", async () => {
     const serverConfig = {
-        autoServe: false,
+        autoServe: true,
+        host: "localhost",
         port: 3045,
     };
 
     const server = new WSServer(serverConfig);
 
-    console.log(server);
+    const conn = new WebSocket("ws://localhost:3045");
 
-    server.serve();
+    await awaitOpen(conn);
 
-    const conn = new WebSocket("ws://localhost:8080");
+    conn.send("hello");
 
-    console.log(conn);
+    const response = await awaitResponse(conn);
 
-    server.close();
+    if (response) {
+        conn.close();
 
-    assertEquals(serverConfig.port, server.config.port);
+        server.close();
+    }
+
+    assertEquals<number>(server.config.port, serverConfig.port);
+
+    assertEquals<boolean>(server.listening, true);
 });

@@ -7,16 +7,21 @@ import { WSServerConfig, type WSServerInit } from "./types.ts";
 import { DefaultEvents } from "./DefaultEvents.ts";
 import { Events as EventInterface } from "./Events.ts";
 
-export class WSServer<E extends EventInterface>
-    extends EventEmitter<E & DefaultEvents> {
+export class WSServer //<E extends EventInterface>
+ //extends EventEmitter<DefaultEvents & E>
+{
     public readonly config: WSServerConfig;
 
     public listener?: Deno.Listener;
 
+    get listening(): boolean {
+        return this.listener !== undefined;
+    }
+
     public connections: Set<WebSocket>;
 
     constructor(serverInit: WSServerInit) {
-        super();
+        // super();
 
         const defaulInit: WSServerConfig = {
             host: "localhost",
@@ -34,36 +39,38 @@ export class WSServer<E extends EventInterface>
         }
     }
 
-    serve(): Deno.Listener {
-        const { tls, port, host } = this.config;
+    async serve(): Promise<Deno.Listener> {
+        if (this.listener === undefined) {
+            const { tls, port, host } = this.config;
 
-        let listener: Deno.Listener;
+            let listener: Deno.Listener;
 
-        if (tls) {
-            const { certFile, keyFile } = this.config;
+            if (tls) {
+                const { certFile, keyFile } = this.config;
 
-            listener = Deno.listenTls({
-                hostname: host,
-                port: port,
-                certFile: certFile,
-                keyFile: keyFile,
-            });
-        } else {
-            listener = Deno.listen({
-                hostname: host,
-                port: port,
-            });
+                listener = Deno.listenTls({
+                    hostname: host,
+                    port: port,
+                    certFile: certFile,
+                    keyFile: keyFile,
+                });
+            } else {
+                listener = Deno.listen({
+                    hostname: host,
+                    port: port,
+                });
 
-            console.log(listener);
+                console.log(listener);
+            }
+
+            this.listener = listener;
+
+            for await (const conn of this.listener) {
+                this.handleConnection(conn);
+            }
         }
 
-        this.listener = listener;
-
-        // for await (const conn of listener) {
-        //     this.handleConnection(conn);
-        // }
-
-        return listener;
+        return this.listener;
     }
 
     async handleConnection(conn: Deno.Conn): Promise<Deno.HttpConn> {
@@ -102,6 +109,8 @@ export class WSServer<E extends EventInterface>
 
         socket.addEventListener("message", (event) => {
             console.log("socket message:", event.data);
+
+            socket.send(event.data);
         });
 
         socket.addEventListener("close", (event) => {
