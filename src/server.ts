@@ -34,7 +34,7 @@ export class WSServer<E extends EventInterface>
         }
     }
 
-    async serve(): Promise<Deno.Listener> {
+    serve(): Deno.Listener {
         const { tls, port, host } = this.config;
 
         let listener: Deno.Listener;
@@ -53,13 +53,15 @@ export class WSServer<E extends EventInterface>
                 hostname: host,
                 port: port,
             });
-        }
 
-        for await (const conn of listener) {
-            this.handleConnection(conn);
+            console.log(listener);
         }
 
         this.listener = listener;
+
+        // for await (const conn of listener) {
+        //     this.handleConnection(conn);
+        // }
 
         return listener;
     }
@@ -103,14 +105,7 @@ export class WSServer<E extends EventInterface>
         });
 
         socket.addEventListener("close", (event) => {
-            console.info(
-                "socket closed. Code: ",
-                event.code,
-                ", Reason: ",
-                event.reason,
-                ", Clean: ",
-                event.wasClean,
-            );
+            console.info(`socket closed. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`);
             // this.emit("disconnect", { socket: socket });
         });
 
