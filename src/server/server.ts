@@ -9,9 +9,7 @@ import { DefaultEvents } from "./DefaultEvents.ts";
 
 import type { /*WSEvent,*/ Event } from "./types.ts";
 
-export class WSServer<E extends Event>
-    extends EventEmitter<DefaultEvents & E> {
-
+export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
     public readonly config: WSServerConfig;
 
     public listener?: Deno.Listener;

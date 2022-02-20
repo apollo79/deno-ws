@@ -32,12 +32,6 @@ type WSEvent = (data: {
 
 type Event = {
     [key: string]: WSEvent;
-}
-
-export type {
-    WSServerConfig,
-    WSServerEvents,
-    WSServerInit,
-    WSEvent,
-    Event
 };
+
+export type { Event, WSEvent, WSServerConfig, WSServerEvents, WSServerInit };
