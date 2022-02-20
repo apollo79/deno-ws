@@ -2,7 +2,7 @@ import { WSServer } from "../mod.ts";
 
 import { assertEquals } from "https://deno.land/std@0.126.0/testing/asserts.ts";
 
-import { awaitOpen, awaitResponse } from "./helpers/WebSocket/awaitEvents.ts";
+import { awaitOpen, awaitResponse } from "./helpers/client/awaitEvents.ts";
 
 Deno.test("run server", async () => {
     const serverConfig = {
