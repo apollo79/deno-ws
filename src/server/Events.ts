@@ -1,6 +1,6 @@
 import { WSEvent } from "./WsEvent.ts";
 
-export interface Events extends WSEvent {
+export interface Events {
     [key: string]: unknown;
 }
 

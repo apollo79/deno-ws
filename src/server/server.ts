@@ -1,15 +1,17 @@
-// import { EventEmitter } from "./deps.ts";
+import { EventEmitter } from "./deps.ts";
 import { WSServerConfig, type WSServerInit } from "./types.ts";
 
 // https://deno.com/blog/v1.12#server-side-websocket-support-in-native-http
 // https://stackoverflow.com/questions/71131574/deno-land-ws-module-not-found/71133383#comment125796183_71133383
 
-// import { DefaultEvents } from "./DefaultEvents.ts";
-// import { Events as EventInterface } from "./Events.ts";
+import { DefaultEvents } from "./DefaultEvents.ts";
+import { Events as EventInterface } from "./Events.ts";
 
-export class WSServer //<E extends EventInterface>
- //extends EventEmitter<DefaultEvents & E>
-{
+import type { WSEvent, Event } from "./types.ts";
+
+export class WSServer<E extends Event>
+    extends EventEmitter<DefaultEvents & E> {
+
     public readonly config: WSServerConfig;
 
     public listener?: Deno.Listener;
@@ -21,7 +23,7 @@ export class WSServer //<E extends EventInterface>
     public connections: Set<WebSocket>;
 
     constructor(serverInit: WSServerInit) {
-        // super();
+        super();
 
         const defaulInit: WSServerConfig = {
             host: "localhost",
