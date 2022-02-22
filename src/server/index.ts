@@ -1,1 +1,1 @@
-export { WSServer } from "./server.ts";
+export { WSServer } from "./WSServer.ts";
