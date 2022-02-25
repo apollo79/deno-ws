@@ -4,10 +4,13 @@ import { WSServerConfig, type WSServerInit } from "./types.ts";
 // https://deno.com/blog/v1.12#server-side-websocket-support-in-native-http
 // https://stackoverflow.com/questions/71131574/deno-land-ws-module-not-found/71133383#comment125796183_71133383
 
-import { DefaultEvents } from "./DefaultEvents.ts";
-// import { Events as EventInterface } from "./Events.ts";
+import type { CustomEventMap, TypedCustomEvent } from "./deps.ts";
+import { WSEventDetail } from "./types.ts";
 
-import type { /*WSEvent,*/ Event } from "./types.ts";
+export interface DefaultEvents extends CustomEventMap {
+    connection: TypedCustomEvent<"connection", WSEventDetail>;
+    disconnect: TypedCustomEvent<"disconnect", WSEventDetail>;
+}
 
 export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
     public readonly config: WSServerConfig;
