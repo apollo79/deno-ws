@@ -26,10 +26,6 @@ type WSServerConfig =
 type WSEventDetail = {
     socket: WebSocket;
     [key: string]: unknown;
-}
-
-export type {
-    WSEventDetail,
-    WSServerConfig,
-    WSServerInit,
 };
+
+export type { WSEventDetail, WSServerConfig, WSServerInit };
