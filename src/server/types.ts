@@ -25,13 +25,22 @@ type WSServerConfig =
 
 type WSServerEvents = "connection" | "disconnect" | "message";
 
+type EventCallback = (...args: unknown[]) => void | Promise<void>;
+
 type WSEvent = (data: {
     socket: WebSocket;
     [key: string]: unknown;
 }) => void | Promise<void>;
 
 type Event = {
-    [key: string]: WSEvent;
+    [key: string]: EventCallback;
 };
 
-export type { Event, WSEvent, WSServerConfig, WSServerEvents, WSServerInit };
+export type {
+    EventCallback,
+    Event,
+    WSEvent,
+    WSServerConfig,
+    WSServerEvents,
+    WSServerInit
+};
