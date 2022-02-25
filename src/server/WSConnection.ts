@@ -1,5 +1,3 @@
-import { isJSON } from "../util/isJSON.ts";
-
 export class WSConnection {
     /**
      * @todo Maybe in future allow WebSocketStreams

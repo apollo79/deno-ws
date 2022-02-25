@@ -7,7 +7,8 @@ interface Events extends CustomEventMap {
     pong: TypedCustomEvent<"pong", undefined>;
 }
 
-export class WSJSONConnection<E extends CustomEventMap = Record<never, never>> extends EventEmitter<E & Events> {
+export class WSJSONConnection<E extends CustomEventMap = Record<never, never>>
+    extends EventEmitter<E & Events> {
     /**
      * @todo Maybe in future allow WebSocketStreams
      */

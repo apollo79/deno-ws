@@ -37,10 +37,10 @@ type Event = {
 };
 
 export type {
-    EventCallback,
     Event,
+    EventCallback,
     WSEvent,
     WSServerConfig,
     WSServerEvents,
-    WSServerInit
+    WSServerInit,
 };
