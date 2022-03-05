@@ -6,13 +6,15 @@ import { WSServerConfig, type WSServerInit } from "./types.ts";
 
 import type { CustomEventMap, TypedCustomEvent } from "./deps.ts";
 import { WSEventDetail } from "./types.ts";
+import { WSConnection } from "./WSConnection.ts";
 
 export interface DefaultEvents extends CustomEventMap {
     connection: TypedCustomEvent<"connection", WSEventDetail>;
     disconnect: TypedCustomEvent<"disconnect", WSEventDetail>;
 }
 
-export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
+export class WSServer<E extends CustomEventMap = Record<never, never>>
+    extends EventEmitter<DefaultEvents & E> {
     public readonly config: WSServerConfig;
 
     public listener?: Deno.Listener;
@@ -21,7 +23,7 @@ export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
         return this.listener !== undefined;
     }
 
-    public connections: Set<WebSocket>;
+    public connections: Set<WSConnection>;
 
     constructor(serverInit: WSServerInit) {
         super();
@@ -35,7 +37,7 @@ export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
 
         this.config = Object.assign(defaulInit, serverInit);
 
-        this.connections = new Set<WebSocket>();
+        this.connections = new Set<WSConnection>();
 
         if (this.config.autoServe) {
             this.serve();
@@ -91,7 +93,11 @@ export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
             } else {
                 response = upgraded.response;
 
-                this.listenForEvents(upgraded.socket);
+                const conn = new WSConnection(upgraded.socket);
+
+                this.connections.add(conn);
+
+                this.listenForEvents(conn);
             }
 
             event.respondWith(response);
@@ -105,22 +111,27 @@ export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
         return httpConn;
     }
 
-    listenForEvents(socket: WebSocket): void {
-        socket.addEventListener("open", () => {
+    listenForEvents(socket: WSConnection): void {
+        socket.on("open", ({ detail }) => {
             console.log("socket opened");
+
+            this.emit("connection", { socket: detail.socket });
         });
 
-        socket.addEventListener("message", (event) => {
-            console.log("socket message:", event.data);
+        socket.on("message", ({ detail }) => {
+            console.log("socket message:", detail.event.data);
 
-            socket.send(event.data);
+            socket.send(detail.event.data);
         });
 
-        socket.addEventListener("close", (event) => {
+        socket.addEventListener("close", ({ detail }) => {
+            const { event, socket } = detail;
+
             console.info(
                 `socket closed. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`,
             );
-            // this.emit("disconnect", { socket: socket });
+
+            this.emit("disconnect", { socket: socket });
         });
 
         socket.addEventListener("error", (event) => {
@@ -138,7 +149,9 @@ export class WSServer<E extends Event> extends EventEmitter<DefaultEvents & E> {
         // Upgrade the incoming HTTP request to a WebSocket connection
         const { socket, response } = Deno.upgradeWebSocket(req);
 
-        this.connections.add(socket);
+        const conn = new WSConnection(socket);
+
+        this.connections.add(conn);
 
         // this.emit("connection", { socket: socket });
 
