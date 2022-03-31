@@ -4,6 +4,12 @@
 
 import { Connection } from "./Connection.ts";
 import { CustomEventMap, EventEmitter, Fn } from "../../deps.ts";
+import {
+    createMapEntryIfNotExistsAndGet,
+    EnhancedMap,
+    EnhancedSet,
+} from "../util/index.ts";
+import type { ValueAndKeyFunction as FilterFunction } from "../util/index.ts";
 
 export interface StdEvents extends CustomEventMap {
     open: undefined;
@@ -14,7 +20,8 @@ export type SubChannelsArgType = Map<string, Channel> | [string, Channel][];
 export class Channel extends EventEmitter<StdEvents> {
     public readonly name?: string;
 
-    public connections: Connection[];
+    public connections: EnhancedSet<Connection>;
+    public channels: EnhancedMap<string, Channel>;
 
     /**
      * @param connections an array of Connections @see Connection
@@ -22,23 +29,25 @@ export class Channel extends EventEmitter<StdEvents> {
      */
     constructor(
         name?: string,
-        connections: Connection[] = [],
+        connections: Connection[] | Set<Connection> = new Set(),
     ) {
         super();
 
         this.name = name;
 
-        this.connections = connections;
+        this.connections = new EnhancedSet(connections);
+
+        this.channels = new EnhancedMap();
     }
 
     get length() {
-        return this.connections.length;
+        return this.connections.size;
     }
 
     join(...connections: Connection[]): this {
         connections.forEach((conn) => {
-            if (conn && this.connections.indexOf(conn) !== -1) {
-                this.connections.push(conn);
+            if (conn && !this.connections.has(conn)) {
+                this.connections.add(conn);
             }
         });
 
@@ -52,11 +61,7 @@ export class Channel extends EventEmitter<StdEvents> {
 
                 this.leave(...this.connections.filter(callback));
             } else {
-                const index = this.connections.indexOf(current);
-
-                if (index !== -1) {
-                    this.connections.splice(index, 1);
-                }
+                this.connections.delete(current);
             }
         });
 
@@ -67,7 +72,7 @@ export class Channel extends EventEmitter<StdEvents> {
         return this;
     }
 
-    filter(fn: (conn: Connection) => boolean): Channel {
+    filter(fn: Fn<[Connection], boolean>): Channel {
         return new Channel(this.name, this.connections.filter(fn));
     }
 
@@ -77,6 +82,18 @@ export class Channel extends EventEmitter<StdEvents> {
         });
 
         return this;
+    }
+
+    channel(name: string): Channel {
+        const createChannelIfNotExistsAndGet = (name: string): Channel => {
+            return createMapEntryIfNotExistsAndGet<Channel>(
+                this.channels,
+                name,
+                new Channel(),
+            );
+        };
+
+        return createChannelIfNotExistsAndGet(name);
     }
 }
 

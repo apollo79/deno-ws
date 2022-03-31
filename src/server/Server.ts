@@ -11,8 +11,7 @@ import {
 
 import { Connection } from "./Connection.ts";
 import Channel from "./Channel.ts";
-import { createMapEntryIfNotExistsAndGet } from "./util/index.ts";
-import { Group } from "./Group.ts";
+import { createMapEntryIfNotExistsAndGet, EnhancedMap } from "../util/index.ts";
 
 export interface DefaultEvents extends CustomEventMap {
     connect: WSConnEventDetail;
@@ -33,11 +32,9 @@ extends EventEmitter<DefaultEvents /* & E */> {
         return this.server !== undefined;
     }
 
-    public connections: Map<number, Connection>;
+    public connections: EnhancedMap<number, Connection>;
 
-    public channels: Map<string, Channel>;
-
-    public groups: Map<string, Group>;
+    public channels: EnhancedMap<string, Channel>;
 
     public readonly tls: boolean;
 
@@ -63,11 +60,9 @@ extends EventEmitter<DefaultEvents /* & E */> {
 
         this.config = Object.assign(defaultInit, serverInit);
 
-        this.connections = new Map<number, Connection>();
+        this.connections = new EnhancedMap<number, Connection>();
 
-        this.channels = new Map<string, Channel>();
-
-        this.groups = new Map<string, Group>();
+        this.channels = new EnhancedMap<string, Channel>();
 
         this.tls = (this.config.certFile && this.config.keyFile) ? true : false;
 
@@ -199,16 +194,6 @@ extends EventEmitter<DefaultEvents /* & E */> {
     }
 
     channel(name: string): Channel {
-        const pos = name.indexOf("/");
-
-        const createGroupIfNotExistsAndGet = (name: string): Group => {
-            return createMapEntryIfNotExistsAndGet<Group>(
-                this.groups,
-                name,
-                new Group(),
-            );
-        };
-
         const createChannelIfNotExistsAndGet = (name: string): Channel => {
             return createMapEntryIfNotExistsAndGet<Channel>(
                 this.channels,
@@ -216,13 +201,6 @@ extends EventEmitter<DefaultEvents /* & E */> {
                 new Channel(),
             );
         };
-
-        if (pos !== -1) {
-            const [groupName] = name.split("/", 1);
-
-            return createGroupIfNotExistsAndGet(groupName)
-                .channel(name.slice(pos + 1));
-        }
 
         return createChannelIfNotExistsAndGet(name);
     }

@@ -4,6 +4,7 @@ import { CustomEventMap, EventEmitter } from "../../deps.ts";
 export interface StdEvents extends CustomEventMap {
     open: Pick<Event, "timeStamp">;
     close: Pick<CloseEvent, "code" | "reason" | "wasClean" | "timeStamp">;
+    // deno-lint-ignore no-explicit-any
     message: MessageEvent<any>["data"];
     error: Event | ErrorEvent;
     upgraded: WebSocket;
