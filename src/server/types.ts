@@ -1,3 +1,10 @@
+import { Connection } from "./Connection.ts";
+
+type Fn<
+    Params extends readonly unknown[] = readonly unknown[],
+    Result = unknown,
+> = (...params: Params) => Result;
+
 type WSServerInit = {
     host?: string;
     port?: number;
@@ -7,25 +14,31 @@ type WSServerInit = {
     autoServe?: boolean;
 };
 
-type WSServerConfig =
-    & {
-        host: string;
-        port: number;
-        autoServe: boolean;
-    }
-    & (
-        {
-            tls: true;
-            certFile: string;
-            keyFile: string;
-        } | {
-            tls: false;
-        }
-    );
+type WSServerConfig = {
+    host: string;
+    port: number;
+    autoServe: boolean;
+    path?: string;
+
+    certFile?: string;
+    keyFile?: string;
+};
 
 type WSEventDetail = {
     socket: WebSocket;
     [key: string]: unknown;
 };
 
-export type { WSEventDetail, WSServerConfig, WSServerInit };
+type WSConnEventDetail = {
+    conn: Connection;
+    time?: number;
+    [key: string]: unknown;
+};
+
+export type {
+    Fn,
+    WSConnEventDetail,
+    WSEventDetail,
+    WSServerConfig,
+    WSServerInit,
+};
