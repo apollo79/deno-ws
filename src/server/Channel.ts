@@ -9,7 +9,6 @@ import {
     EnhancedMap,
     EnhancedSet,
 } from "../util/index.ts";
-import type { ValueAndKeyFunction as FilterFunction } from "../util/index.ts";
 
 export interface StdEvents extends CustomEventMap {
     open: undefined;

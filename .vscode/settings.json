@@ -15,5 +15,11 @@
                 "cmd": "deno fmt ${file}"
             }
         ]
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": "file:///d%3A/Programmierung/Programs/deno-ws/.github/workflows/deploy.yml"
     }
 }

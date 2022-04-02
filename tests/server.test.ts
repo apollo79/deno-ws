@@ -23,7 +23,7 @@ Deno.test("run server", async () => {
 
     const msg = await server.pull("message");
 
-    assertEquals<string>(JSON.parse(msg.event.data), "hello");
+    assertEquals<string>(JSON.parse(msg.data), "hello");
 
     conn.close();
 

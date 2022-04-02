@@ -19,7 +19,9 @@ export interface DefaultEvents extends CustomEventMap {
         code: number;
         reason: string;
     };
-    message: WSConnEventDetail & { event: MessageEvent<string> };
+    message: WSConnEventDetail & {
+        data: MessageEvent["data"];
+    };
 }
 
 export class Server // <E extends CustomEventMap = Record<never, never>>
@@ -103,6 +105,10 @@ extends EventEmitter<DefaultEvents /* & E */> {
         return this.serve();
     }
 
+    listen(): void {
+        return this.serve();
+    }
+
     /**
      * @see https://github.com/drashland/wocket/blob/main/src/server.ts#L189 (#getHandler method)
      * @returns
@@ -137,55 +143,32 @@ extends EventEmitter<DefaultEvents /* & E */> {
 
             connections.set(id, conn);
 
-            conn.addEventListener("open", ({ detail }) => {
+            conn.on("open", ({ timeStamp }) => {
                 this.emit("connect", {
-                    conn: conn,
-                    time: detail.timeStamp,
+                    conn,
+                    timeStamp,
                 });
             });
 
             // When the socket calls `.send()`, then do the following
-            conn.addEventListener("message", ({ detail }) => {
-                const message: MessageEvent = detail;
-
-                try {
-                    if ("data" in message && typeof message.data === "string") {
-                        // const json = JSON.parse(message.data); // TODO wrap in a try catch, if error throw then send error message to client maybe? ie malformed request
-
-                        // Get the channel they want to send the msg to
-                        // const channel = channels.get(json.channel);
-
-                        // if (!channel) {
-                        //     socket.send(
-                        //         `The channel "${json.channel}" doesn't exist as the server hasn't created a listener for it`,
-                        //     );
-                        //     return;
-                        // }
-
-                        this.emit("message", {
-                            conn: conn,
-                            time: message.timeStamp,
-                            event: message,
-                        });
-                    }
-                } catch (error) {
-                    socket.send(error.message);
-                }
+            conn.on("message", ({ timeStamp, data }) => {
+                this.emit("message", {
+                    conn,
+                    timeStamp,
+                    data,
+                });
             });
 
             // When the socket calls `.close()`, then do the following
-            conn.addEventListener("close", ({ detail }) => {
+            conn.on("close", ({ code, reason, timeStamp }) => {
                 // Remove the client
                 connections.delete(conn.id);
 
-                // Call the disconnect handler if defined
-                const { code, reason } = detail;
-
                 this.emit("disconnect", {
-                    conn: conn,
-                    time: detail.timeStamp,
-                    code: code,
-                    reason: reason,
+                    conn,
+                    timeStamp,
+                    reason,
+                    code,
                 });
             });
 

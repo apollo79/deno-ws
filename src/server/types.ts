@@ -31,7 +31,7 @@ type WSEventDetail = {
 
 type WSConnEventDetail = {
     conn: Connection;
-    time?: number;
+    timeStamp?: number;
     [key: string]: unknown;
 };
 
